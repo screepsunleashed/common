@@ -1,19 +1,19 @@
-const _ = require('lodash'),
-    C = require('./constants');
+import * as _ from 'lodash';
+import * as C from './constants';
 
 const transforms = {
-    'string': value => "" + value,
-    'number': parseInt,
-    'boolean': value => !!value,
-    'price': value => parseInt((1000 * value).toFixed(0)),
-    'string[]': value => _.isArray(value) ? _.map(value, i => "" + i) : undefined,
-    'number[]': value => _.isArray(value) ? _.map(value, i => parseInt(i)) : undefined,
-    'bodypart[]': value => _.filter(value, i => _.contains(C.BODYPARTS_ALL, i)),
-    'userString': value => ("" + (value||"")).substring(0, 100),
-    'userText': value => ("" + (value||"")).substring(0, 1000)
+    string: value => '' + value,
+    number: parseInt,
+    boolean: value => !!value,
+    price: value => parseInt((1000 * value).toFixed(0)),
+    userString: value => ('' + (value || '')).substring(0, 100),
+    userText: value => ('' + (value || '')).substring(0, 1000),
+    'string[]': value => _.isArray(value) ? _.map(value, i => '' + i) : undefined,
+    'number[]': value => _.isArray(value) ? _.map(value, i => parseInt(i, 10)) : undefined,
+    'bodypart[]': value => _.filter(value, i => C.BODYPARTS_ALL.includes(i)),
 };
 
-const intentTypes = {
+const intents = {
     notify: { message: 'userText', groupInterval: 'number' },
     createConstructionSite: { roomName: 'string', x: 'number', y: 'number', structureType: 'string', name: 'string' },
     createFlag: { roomName: 'string', x: 'number', y: 'number', name: 'string', color: 'number', secondaryColor: 'number' },
@@ -38,7 +38,7 @@ const intentTypes = {
     build: { id: 'string', x: 'number', y: 'number' },
     cancelSpawning: {},
     claimController: { id: 'string' },
-    createCreep: { name: 'string', body: 'bodypart[]', energyStructures: 'string[]', directions: 'number[]'},
+    createCreep: { name: 'string', body: 'bodypart[]', energyStructures: 'string[]', directions: 'number[]' },
     destroy: {},
     dismantle: { id: 'string' },
     drop: { amount: 'number', resourceType: 'string' },
@@ -71,7 +71,7 @@ const intentTypes = {
     setPosition: { x: 'number', y: 'number', roomName: 'string' },
     setPublic: { isPublic: 'boolean' },
     setSpawnDirections: { directions: 'number[]' },
-    signController: { id: 'string', sign: 'userString'},
+    signController: { id: 'string', sign: 'userString' },
     suicide: {},
     transfer: { id: 'string', amount: 'number', resourceType: 'string' },
     unboostCreep: { id: 'string' },
@@ -81,42 +81,36 @@ const intentTypes = {
     withdraw: { id: 'string', amount: 'number', resourceType: 'string' }
 };
 
-const sanitizeIntent = function sanitizeIntent(name, intent, customIntentTypes = {}) {
+/** */
+function sanitizeIntent(name: string, intent: Record<string, string>) {
     const result = {};
 
-    const intentType = intentTypes[name] || customIntentTypes[name];
-    for(let field in intentType) {
-        result[field] = transforms[intentType[field]](intent[field]);
+    for (const field of Object.values<string>(intents[name])) {
+        result[field] = transforms[intents[name][field]](intent[field]);
     }
 
     return result;
-};
+}
 
-exports.sanitizeUserIntents = function sanitizeUserIntents(input, customIntentTypes = {}) {
+/** */
+export function sanitizeUserIntents(input: Record<string, string | Record<string, string>>) {
     const intentResult = {};
-    for(let name in intentTypes) {
-        if(input[name]) {
+    for (const name of Object.keys(intents)) {
+        if (input[name]) {
             intentResult[name] = _.isArray(input[name]) ?
                 _.map(input[name], i => sanitizeIntent(name, i)) :
-                sanitizeIntent(name, input[name], customIntentTypes);
-        }
-    }
-
-    for(let name in customIntentTypes) {
-        if(input[name]) {
-            intentResult[name] = _.isArray(input[name]) ?
-                _.map(input[name], i => sanitizeIntent(name, i, customIntentTypes)) :
-                sanitizeIntent(name, input[name], customIntentTypes);
+                sanitizeIntent(name, input[name] as Record<string, string>);
         }
     }
 
     return intentResult;
-};
+}
 
-exports.sanitizeUserRoomIntents = function sanitizeUserRoomIntents(input, result, customIntentTypes = {}, groupingField = 'roomName') {
-    for(let name in intentTypes) {
-        if(input[name]) {
-            for(let intent of input[name]) {
+/** */
+export function sanitizeUserRoomIntents(input, result, groupingField = 'roomName') {
+    for (const name of Object.keys(intents)) {
+        if (input[name]) {
+            for (const intent of input[name]) {
                 const sanitized = sanitizeIntent(name, intent);
                 const groupingValue = sanitized[groupingField];
                 const roomNameResult = result[groupingValue] = result[groupingValue] || {};
@@ -125,16 +119,4 @@ exports.sanitizeUserRoomIntents = function sanitizeUserRoomIntents(input, result
             }
         }
     }
-
-    for(let name in customIntentTypes) {
-        if(input[name]) {
-            for(let intent of input[name]) {
-                const sanitized = sanitizeIntent(name, intent, customIntentTypes);
-                const groupingValue = sanitized[groupingField];
-                const roomNameResult = result[groupingValue] = result[groupingValue] || {};
-                const roomResult = roomNameResult.room = roomNameResult.room || {};
-                (roomResult[name] = roomResult[name] || []).push(sanitized);
-            }
-        }
-    }
-};
+}

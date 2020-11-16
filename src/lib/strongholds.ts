@@ -1,7 +1,7 @@
-const C = require('./constants');
+import * as C from './constants';
 
-module.exports.templates = {
-    'bunker1': {
+export const templates = {
+    bunker1: {
         description: 'Level 1 bunker-style Stronghold',
         rewardLevel: 1,
         structures: [
@@ -16,7 +16,7 @@ module.exports.templates = {
             { type: C.STRUCTURE_RAMPART,      dx:  1, dy:  0 },
         ]
     },
-    'bunker2': {
+    bunker2: {
         description: 'Level 2 bunker-style Stronghold',
         rewardLevel: 2,
         structures: [
@@ -42,7 +42,7 @@ module.exports.templates = {
             { type: C.STRUCTURE_RAMPART,    dx: -1, dy:  0 },
         ]
     },
-    'bunker3': {
+    bunker3: {
         description: 'Level 3 bunker-style Stronghold',
         rewardLevel: 3,
         structures: [
@@ -83,7 +83,7 @@ module.exports.templates = {
             { type: C.STRUCTURE_RAMPART,    dx:  0, dy:  2 },
         ]
     },
-    'bunker4': {
+    bunker4: {
         description: 'Level 4 bunker-style Stronghold',
         rewardLevel: 4,
         structures: [
@@ -143,7 +143,7 @@ module.exports.templates = {
             { type: C.STRUCTURE_RAMPART,    dx:  0, dy: -2 },
         ]
     },
-    'bunker5': {
+    bunker5: {
         description: 'Level 5 bunker-style Stronghold',
         rewardLevel: 5,
         structures: [
@@ -245,14 +245,14 @@ module.exports.templates = {
     }
 };
 
-module.exports.coreRewards = {
+export const coreRewards = {
     [C.RESOURCE_SILICON]: [C.RESOURCE_WIRE, C.RESOURCE_SWITCH, C.RESOURCE_TRANSISTOR, C.RESOURCE_MICROCHIP, C.RESOURCE_CIRCUIT, C.RESOURCE_DEVICE],
     [C.RESOURCE_METAL]: [C.RESOURCE_ALLOY, C.RESOURCE_TUBE, C.RESOURCE_FIXTURES, C.RESOURCE_FRAME, C.RESOURCE_HYDRAULICS, C.RESOURCE_MACHINE],
     [C.RESOURCE_BIOMASS]: [C.RESOURCE_CELL, C.RESOURCE_PHLEGM, C.RESOURCE_TISSUE, C.RESOURCE_MUSCLE, C.RESOURCE_ORGANOID, C.RESOURCE_ORGANISM],
     [C.RESOURCE_MIST]: [C.RESOURCE_CONDENSATE, C.RESOURCE_CONCENTRATE, C.RESOURCE_EXTRACT, C.RESOURCE_SPIRIT, C.RESOURCE_EMANATION, C.RESOURCE_ESSENCE]
 };
 
-module.exports.containerRewards = {
+export const containerRewards = {
     [C.RESOURCE_UTRIUM_BAR]: 5,
     [C.RESOURCE_LEMERGIUM_BAR]: 5,
     [C.RESOURCE_ZYNTHIUM_BAR]: 5,
